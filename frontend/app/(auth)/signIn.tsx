@@ -7,6 +7,7 @@ const signIn = () => {
     <View className='flex-1 items-center justify-center bg-background'>
         <Text>SignIn</Text>
         <Link href="/(auth)/signUp">Sign Up</Link>
+        <Link href="/(tabs)">Home</Link>
     </View>
   )
 }
