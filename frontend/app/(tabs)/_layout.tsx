@@ -1,15 +1,24 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { tabs } from "@/constants/data";
 import { View } from "react-native";
 import { Image } from "react-native";
 import { clsx } from "clsx";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, components } from "@/constants/theme"
+import { colors, components } from "@/constants/theme";
+import { useAuth } from "@clerk/expo";
 
 const tabBar = components.tabBar;
 
 const TabLayout = () => {
+  const { isSignedIn, isLoaded } = useAuth();
   const insets = useSafeAreaInsets();
+
+  if (!isLoaded) return null;
+
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/signIn" />;
+  }
+
   const TabIcon = ({ focused, icon }: TabIconProps) => {
     return (
       <View className="tabs-icon">
@@ -40,8 +49,8 @@ const TabLayout = () => {
         tabBarIconStyle: {
           width: tabBar.iconFrame,
           height: tabBar.iconFrame,
-          alignItems: 'center'
-        }
+          alignItems: "center",
+        },
       }}
     >
       {tabs.map((tab) => (
@@ -50,12 +59,16 @@ const TabLayout = () => {
           name={tab.name}
           options={{
             title: tab.title,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon focused={focused} icon={tab.icon} />
-            ),
+            tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon={tab.icon} />,
           }}
         />
       ))}
+      <Tabs.Screen
+        name="subscriptions/[id]"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 };

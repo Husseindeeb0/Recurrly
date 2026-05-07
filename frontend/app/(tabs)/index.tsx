@@ -1,5 +1,5 @@
 import "../../global.css";
-import { Text, View, Image, Pressable, FlatList } from "react-native";
+import { Text, View, Image, FlatList } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
 import { HOME_BALANCE, HOME_SUBSCRIPTIONS } from "@/constants/data";
@@ -10,9 +10,11 @@ import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import { UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import { useState } from "react";
+import { useUser } from "@clerk/expo";
 
 const SafeAreaView = styled(RNSafeAreaView); //  To enable the use of native wind styling on SAV
 export default function App() {
+  const { user } = useUser();
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
@@ -24,10 +26,16 @@ export default function App() {
             <View className="home-header">
               <View className="home-user">
                 <Image
-                  source={require("../../assets/images/avatar.png")}
+                  source={
+                    user?.imageUrl
+                      ? { uri: user.imageUrl }
+                      : require("../../assets/images/avatar.png")
+                  }
                   className="home-avatar"
                 />
-                <Text className="home-user-name"></Text>
+                <Text className="home-user-name">
+                  {user?.firstName || user?.emailAddresses[0]?.emailAddress}
+                </Text>
               </View>
 
               {/* <Pressable onPress={() => setIsModalVisible(true)}>
