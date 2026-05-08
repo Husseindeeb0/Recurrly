@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth, useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { posthog } from "../../src/config/posthog";
 
 const SettingsScreen = () => {
   const { signOut } = useAuth();
@@ -12,6 +13,8 @@ const SettingsScreen = () => {
 
   const handleSignOut = async () => {
     try {
+      posthog.capture("user_signed_out");
+      posthog.reset();
       await signOut();
       router.replace("/(auth)/signIn");
     } catch (error) {

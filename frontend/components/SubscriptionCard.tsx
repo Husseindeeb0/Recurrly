@@ -3,6 +3,7 @@ import React from "react";
 import { formatCurrency, formatStatusLabel } from "@/lib/utils";
 import clsx from "clsx";
 import { formatSubscriptionDateTime } from "@/lib/utils";
+import { posthog } from "@/src/config/posthog";
 
 const SubscriptionCard = ({
   name,
@@ -22,7 +23,17 @@ const SubscriptionCard = ({
 }: SubscriptionCardProps) => {
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        if (!expanded) {
+          posthog.capture("subscription_expanded", {
+            subscription_name: name,
+            billing_cycle: billing,
+            category: category || plan || "unknown",
+          });
+        }
+        onPress();
+      }}
+      android_ripple={{ color: "rgba(0, 0, 0, 0.05)" }}
       className={clsx("sub-card", expanded ? "sub-card-expanded" : "bg-card")}
       style={!expanded && color ? { backgroundColor: color } : undefined}
     >
@@ -41,12 +52,12 @@ const SubscriptionCard = ({
           </View>
         </View>
         <View className="sub-price-box">
-          <Text className="sub-pric">{formatCurrency(price, currency)}</Text>
+          <Text className="sub-price">{formatCurrency(price, currency)}</Text>
           <Text className="sub-billing">{currency}</Text>
         </View>
       </View>
       {expanded && (
-        <View className="sub-bdy">
+        <View className="sub-body">
           <View className="sub-details">
             <View className="sub-row">
               <View className="sub-row-copy">

@@ -14,6 +14,7 @@ import { Link, useRouter } from "expo-router";
 import { useClerk, useAuth } from "@clerk/expo";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 import { styled } from "nativewind";
+import { posthog } from "../../src/config/posthog";
 
 const SafeAreaView = styled(RNSafeAreaView);
 
@@ -45,13 +46,18 @@ const SignUpScreen = () => {
         password,
       });
 
-      // Send the verification code to the user's email
+      // Send the verification code to the user's account
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      posthog.capture("sign_up_verification_started");
 
       // Change the UI to our pending verification view
       setPendingVerification(true);
     } catch (err: any) {
       console.error(JSON.stringify(err, null, 2));
+      posthog.capture("sign_up_failed", {
+        error_code: err.errors?.[0]?.code || "unknown",
+      });
       Alert.alert("Error", err.errors?.[0]?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -75,6 +81,7 @@ const SignUpScreen = () => {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
+        posthog.capture("user_signed_up");
         router.replace("/(tabs)");
       } else {
         console.error(JSON.stringify(completeSignUp, null, 2));
