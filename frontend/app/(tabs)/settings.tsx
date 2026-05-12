@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth, useUser } from "@clerk/expo";
 import { useRouter } from "expo-router";
@@ -10,6 +10,7 @@ const SettingsScreen = () => {
   const { signOut } = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -22,66 +23,131 @@ const SettingsScreen = () => {
     }
   };
 
+  const SettingItem = ({ icon, title, value, type = "link", color = "#081126", onPress }: any) => (
+    <TouchableOpacity 
+      style={{ 
+        flexDirection: "row", 
+        alignItems: "center", 
+        backgroundColor: "#fff8e7", 
+        padding: 20, 
+        borderRadius: 20, 
+        borderWidth: 1, 
+        borderColor: "rgba(0,0,0,0.05)", 
+        marginBottom: 12 
+      }}
+      onPress={onPress}
+      disabled={type === "toggle"}
+      activeOpacity={0.7}
+    >
+      <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "#fff9e3", alignItems: "center", justifyContent: "center", marginRight: 16 }}>
+        <Ionicons name={icon} size={20} color={color} />
+      </View>
+      <Text style={{ flex: 1, fontSize: 16, fontFamily: "sans-semibold", color }}>
+        {title}
+      </Text>
+      {type === "link" && (
+        <Ionicons name="chevron-forward" size={18} color="rgba(8,17,38,0.2)" />
+      )}
+      {type === "toggle" && (
+        <Switch 
+          value={value} 
+          onValueChange={onPress}
+          trackColor={{ false: "#e8def8", true: "#ea7a53" }}
+          thumbColor="#fff"
+        />
+      )}
+      {type === "text" && (
+        <Text style={{ fontSize: 14, fontFamily: "sans-medium", color: "rgba(8, 17, 38, 0.5)" }}>{value}</Text>
+      )}
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView className="flex-1 bg-[#fff9e3]" edges={["top"]}>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24 }}>
-        <View className="mb-10">
-          <Text className="text-3xl font-[sans-extrabold] text-[#081126] mb-2">
-            Settings
-          </Text>
-          <Text className="text-[rgba(8,17,38,0.5)] font-[sans-medium]">
-            Manage your account and preferences
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff9e3" }} edges={["top"]}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+        
+        <View style={{ marginBottom: 32 }}>
+          <Text style={{ fontSize: 30, fontFamily: "sans-extrabold", color: "#081126" }}>Settings</Text>
+          <Text style={{ fontSize: 16, fontFamily: "sans-medium", color: "rgba(8, 17, 38, 0.5)", marginTop: 4 }}>
+            Manage your account and app
           </Text>
         </View>
 
         {/* Profile Card */}
-        <View className="bg-[#fff8e7] rounded-3xl p-6 border border-[rgba(8,17,38,0.08)] mb-10 shadow-sm">
-          <View className="flex-row items-center">
-            <View className="w-16 h-16 rounded-full bg-[#081126] items-center justify-center mr-4 shadow-md">
-              <Text className="text-white text-2xl font-[sans-bold]">
+        <View style={{ backgroundColor: "#fff8e7", borderRadius: 24, padding: 24, borderWidth: 1, borderColor: "rgba(0,0,0,0.05)", marginBottom: 32 }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: "#081126", alignItems: "center", justifyContent: "center", marginRight: 16 }}>
+              <Text style={{ color: "#ffffff", fontSize: 24, fontFamily: "sans-bold" }}>
                 {user?.firstName?.[0] || user?.emailAddresses[0]?.emailAddress?.[0]?.toUpperCase() || "U"}
               </Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-xl font-[sans-bold] text-[#081126]">
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 20, fontFamily: "sans-bold", color: "#081126" }}>
                 {user?.fullName || "Recurly Member"}
               </Text>
-              <Text className="text-[rgba(8,17,38,0.5)] font-[sans-regular]" numberOfLines={1}>
+              <Text style={{ fontSize: 14, fontFamily: "sans-regular", color: "rgba(8, 17, 38, 0.5)" }} numberOfLines={1}>
                 {user?.emailAddresses[0]?.emailAddress}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Action List */}
-        <View className="mb-8">
-          <Text className="text-xs font-[sans-bold] text-[rgba(8,17,38,0.3)] uppercase tracking-widest mb-4 ml-2">
-            Account Actions
+        {/* Preferences Section */}
+        <View style={{ marginBottom: 32 }}>
+          <Text style={{ fontSize: 12, fontFamily: "sans-bold", color: "rgba(8, 17, 38, 0.3)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 16, marginLeft: 8 }}>
+            Preferences
           </Text>
-          
-          <TouchableOpacity 
-            className="flex-row items-center bg-[#fff8e7] p-5 rounded-2xl border border-[rgba(8,17,38,0.08)] shadow-sm active:opacity-70"
-            onPress={handleSignOut}
-          >
-            <View className="w-10 h-10 rounded-xl bg-[rgba(220,38,38,0.1)] items-center justify-center mr-4">
-              <Ionicons name="log-out-outline" size={22} color="#dc2626" />
-            </View>
-            <Text className="flex-1 text-lg font-[sans-semibold] text-[#dc2626]">
-              Sign Out
-            </Text>
-            <Ionicons name="chevron-forward" size={20} color="rgba(8,17,38,0.15)" />
-          </TouchableOpacity>
+          <SettingItem 
+            icon="moon-outline" 
+            title="Dark Mode" 
+            type="toggle" 
+            value={isDarkMode} 
+            onPress={() => setIsDarkMode(!isDarkMode)} 
+          />
+          <SettingItem 
+            icon="notifications-outline" 
+            title="Notifications" 
+            value="Enabled" 
+            type="text" 
+          />
+          <SettingItem 
+            icon="globe-outline" 
+            title="Currency" 
+            value="USD ($)" 
+            type="text" 
+          />
         </View>
 
-        {/* App Info */}
-        <View className="items-center mt-auto pb-10">
-          <View className="w-10 h-10 rounded-xl bg-[rgba(8,17,38,0.05)] items-center justify-center mb-4">
-            <Text className="text-[#081126] font-[sans-bold]">R</Text>
-          </View>
-          <Text className="text-[rgba(8,17,38,0.3)] font-[sans-medium]">
-            Recurly v1.0.0
+        {/* Support Section */}
+        <View style={{ marginBottom: 32 }}>
+          <Text style={{ fontSize: 12, fontFamily: "sans-bold", color: "rgba(8, 17, 38, 0.3)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 16, marginLeft: 8 }}>
+            Support
           </Text>
-          <Text className="text-[rgba(8,17,38,0.2)] font-[sans-regular] text-xs mt-1">
+          <SettingItem icon="help-circle-outline" title="Help Center" />
+          <SettingItem icon="shield-checkmark-outline" title="Privacy Policy" />
+          <SettingItem icon="document-text-outline" title="Terms of Service" />
+        </View>
+
+        {/* Account Section */}
+        <View style={{ marginBottom: 32 }}>
+          <Text style={{ fontSize: 12, fontFamily: "sans-bold", color: "rgba(8, 17, 38, 0.3)", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 16, marginLeft: 8 }}>
+            Account
+          </Text>
+          <SettingItem 
+            icon="log-out-outline" 
+            title="Sign Out" 
+            color="#dc2626" 
+            onPress={handleSignOut} 
+          />
+        </View>
+
+        {/* Footer Info */}
+        <View style={{ alignItems: "center", marginTop: 16 }}>
+          <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(8, 17, 38, 0.05)", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+            <Text style={{ color: "#081126", fontFamily: "sans-bold" }}>R</Text>
+          </View>
+          <Text style={{ fontSize: 14, fontFamily: "sans-medium", color: "rgba(8, 17, 38, 0.5)" }}>Recurly v1.0.0</Text>
+          <Text style={{ fontSize: 12, fontFamily: "sans-regular", color: "rgba(8, 17, 38, 0.3)", marginTop: 4 }}>
             Made with ❤️ for smart billing
           </Text>
         </View>
